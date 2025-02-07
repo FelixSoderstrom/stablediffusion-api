@@ -18,6 +18,6 @@ __pycache__/
 *.pyw~
 old_code/
 ignore_folder/
-models/
+.gguf
 .env
 *.safetensors

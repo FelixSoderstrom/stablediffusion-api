@@ -6,7 +6,7 @@ from stable_diffusion import StableDiffusion
 from PIL import Image
 
 
-prompt = "An image of a beautiful woman with long blonde hair and blue eyes sitting at a busstop, cinematic lighting, detailed shawoding, detailed eyes, high resolution, detailed background and foreground elements"
+prompt = "An image of a ugly woman with long blonde hair and blue eyes sitting at a busstop, cinematic lighting, detailed shawoding, detailed eyes, high resolution, detailed background and foreground elements"
 
 generator = StableDiffusion()
 
