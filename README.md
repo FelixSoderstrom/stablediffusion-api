@@ -37,7 +37,7 @@ No API functionality implemented, this is purely local at the moment.
 Will start implementing API later today/next week.
 
 # Next step
-Implement the API
+- Implement the API
 This whole thing should work as an API where we send prompts here and return images.
 This enables us to use this in more places than just AdventureAI.
 The plan is to run the API on AWS alongside the Mistral model and have 2 separate API's for the game. More on that in the backend repo.
@@ -45,3 +45,10 @@ The plan is to run the API on AWS alongside the Mistral model and have 2 separat
 - Need to look into how to send images over API.
 I understand that pillow objects is a no go lol.
 That kind of only leaves b64 encoding. Will do more research during lunch.
+
+- Discuss the use of the .env
+We are currently using .env to specify which model to use.
+WIn the previous project we had more environmend variables so this makes sense.
+In OUR usecase we are only going to use the one model so having this way of getting the model is dumb.
+Although, maybe someone else wants to use this project and have multiple models available?
+We are not using an interface since this is an API, so maybe having the env file IS the way to go?
