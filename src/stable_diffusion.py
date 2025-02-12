@@ -74,7 +74,6 @@ class StableDiffusion:
     def cleanup(self):
         """Clean up resources."""
         if self.pipeline is not None:
-            self.pipeline.to("cpu")
             del self.pipeline
             self.pipeline = None
             if torch.cuda.is_available():
