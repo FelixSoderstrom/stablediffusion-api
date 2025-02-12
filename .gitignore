@@ -16,8 +16,8 @@ __pycache__/
 *.pyo~
 *.pyd~
 *.pyw~
-old_code/
-ignore_folder/
 .gguf
 .env
 *.safetensors
+test.py
+webapp.html

@@ -1,54 +1,44 @@
 # Important
-**We need to run 3.10 here!**
-We decided to go with python version 3.10 beause there was a compability issue with PyTorch and 3.13.
-3.10 was the most stable version we could do with all of the packages working together.
-Alot of the packages listed in requirements have been downgraded to ensure 3.10 compability.
+**Please ensure you are using python 3.10!**
+To run this script and create your virtual environment, make sure to use Python 3.10.
 
 # Setup
+To set up your environment, execute the following commands in your terminal:
 ```bash
 python-3.10 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
+
 # Before you run:
 ```
-- Downloaded and place your SDXL-model in the models-directory.
-
-- We are using the JuggernautXL Lightning model for testing.
-Additional tweaks might be needed if you opt for a different one.
-
-- Make sure to add the exact filename of your model to an .env-file under the variable name 'MODEL_NAME' (without the .safetensors).
+- Download and place your SDXL model in the `models` directory.
+- We are currently using the JuggernautXL Lightning model for testing. Additional adjustments may be necessary if you choose a different model.
+- Ensure you add the exact filename of your model to an `.env` file under the variable name `MODEL_NAME` (without the `.safetensors` extension).
 ```
 
-# Run
+# To generate a single image:
 ```bash
 python test.py
 ```
 
+# Using the web UI:
+```bash
+uvicorn src.api:app --reload
+```
+Then, open the `webapp.html` file in your browser and enter your prompt.
+
 # Current state
-We have a working image generator using the JuggernautXL model in Stable Diffusion. Run test.py to open an image.
-Images are now 1024x1024. This is significantly larger than the old code.
-But since we are going to run this on AWS we will be fine.
-
-The class no longer enhances prompts. This will have to be done from whereever we use this (soon to be) API.
-This means: prompt in, image out.
-
-No API functionality implemented, this is purely local at the moment.
-Will start implementing API later today/next week.
+We have one endpoint set up.
+It initializes the Stablediffusion pipeline for each request.
+I did this as it felt easier to understand and decided to keep it because it might be useable.
+For the game we will probbably want to have a persistent pipeline across multiple requests.
 
 # Next step
-- Implement the API
-This whole thing should work as an API where we send prompts here and return images.
-This enables us to use this in more places than just AdventureAI.
-The plan is to run the API on AWS alongside the Mistral model and have 2 separate API's for the game. More on that in the backend repo.
-
-- Need to look into how to send images over API.
-I understand that pillow objects is a no go lol.
-That kind of only leaves b64 encoding. Will do more research during lunch.
+- Implement a persistent pipeline across multiple requests.
 
 - Discuss the use of the .env
 We are currently using .env to specify which model to use.
-WIn the previous project we had more environmend variables so this makes sense.
-In OUR usecase we are only going to use the one model so having this way of getting the model is dumb.
-Although, maybe someone else wants to use this project and have multiple models available?
-We are not using an interface since this is an API, so maybe having the env file IS the way to go?
+In the previous project we had more environment variables so this made sense.
+Hardcoding the model name is not a good solution.
+We could add it as an argument to the StableDiffusion class, initially provided by the endpoint (who cares if its hardcoded in our webapp for the game??)

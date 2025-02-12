@@ -3,13 +3,15 @@ import torch
 from PIL import Image
 from diffusers import StableDiffusionXLPipeline, AutoencoderKL
 from dotenv import load_dotenv
+from io import BytesIO
+import base64
 
 
 class StableDiffusion:
     def __init__(self):
         load_dotenv(override=True)
 
-        # Setup model path
+        # Find the model
         self.models_dir = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "models"
         )
@@ -25,10 +27,10 @@ class StableDiffusion:
             raise RuntimeError("CUDA GPU required for image generation")
         self.device = "cuda"
 
-        # Default generation config
+        # Config for generation
         self.default_config = {
-            "num_inference_steps": 30,  # Increased for better quality
-            "guidance_scale": 7.5,  # Standard value for SDXL
+            "num_inference_steps": 30,
+            "guidance_scale": 7.5,
             "negative_prompt": "text, watermark, logo, title, signature, blurry, low quality, distorted",
         }
 
@@ -115,3 +117,9 @@ class StableDiffusion:
 
         except Exception as e:
             raise Exception(f"Error generating image: {str(e)}")
+
+    def convert_into_base64(self, image: Image.Image):
+        buffered = BytesIO()
+        image.save(buffered, format="JPEG")
+        img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+        return img_str
