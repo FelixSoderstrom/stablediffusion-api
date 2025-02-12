@@ -29,14 +29,20 @@ uvicorn src.api:app --reload
 Then, open the `webapp.html` file in your browser and enter your prompt.
 
 # Current state
-We have one endpoint set up.
-It initializes the Stablediffusion pipeline for each request.
-I did this as it felt easier to understand and decided to keep it because it might be useable.
-For the game we will probbably want to have a persistent pipeline across multiple requests.
+We are now using a persistent endpoint that reuses the pipeline initialization.
+The pipeline is initialized when an IP pings the endpoint.
+The pipeline is then cleaned after 5 minutes of inactivity.
+If the same IP pings the endpoint within these 5 minutes, the pipeline is reused.
+
+This allows the used to generate images quicker but more importantly;
+It enables multiple users to generate images simultaneously.
+
+By default the pipeline is not built to be used to generate more than one image at a time.
+Giving each user an instance of the class solves this problem.
+
+When everything works like it should, it takes a while to initialize the pipeline but then image generation is done very fast.
 
 # Next step
-- Implement a persistent pipeline across multiple requests.
-
 - Discuss the use of the .env
 We are currently using .env to specify which model to use.
 In the previous project we had more environment variables so this made sense.
