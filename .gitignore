@@ -20,4 +20,3 @@ __pycache__/
 .env
 *.safetensors
 test.py
-webapp.html

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy Image Generator</title>
+    <!-- Import fantasy-style font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Text:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #7B2CBF;
+            --secondary-color: #3A0CA3;
+            --accent-color: #F72585;
+            --background-start: #240046;
+            --background-end: #3C096C;
+            --text-color: #E0AAFF;
+        }
+
+        body {
+            font-family: 'Crimson Text', serif;
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--background-start), var(--background-end));
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 3em;
+            margin: 0;
+            background: linear-gradient(45deg, var(--accent-color), var(--primary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+
+        #input {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        #prompt {
+            flex-grow: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            font-family: 'Crimson Text', serif;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        #prompt:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 2px var(--accent-color);
+        }
+
+        #prompt::placeholder {
+            color: rgba(224, 170, 255, 0.6);
+        }
+
+        #generate {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            font-family: 'Cinzel', serif;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        #generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, var(--accent-color), var(--primary-color));
+        }
+
+        #generate:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #output {
+            text-align: center;
+        }
+
+        #image {
+            max-width: 100%;
+            display: none;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease;
+        }
+
+        #image:hover {
+            transform: scale(1.02);
+        }
+
+        .loading {
+            display: none;
+            margin: 30px 0;
+            font-size: 1.2em;
+            color: var(--accent-color);
+            text-shadow: 0 0 10px rgba(247, 37, 133, 0.5);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            #input {
+                flex-direction: column;
+            }
+
+            #generate {
+                padding: 12px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="header">
+            <h1>Stable Diffusion API</h1>
+            <p>Generates images using Stable Diffusion and a little bit of luck</p>
+        </div>
+        <div id="input">
+            <input type="text" id="prompt" placeholder="What would you like to see?">
+            <button id="generate">Generate</button>
+        </div>
+        <div id="output">
+            <div class="loading" id="loading"></div>
+            <img id="image" src="" alt="Generated Image">
+        </div>
+    </div>
+
+    <script>
+        // Configurable loading messages - add your own here!
+        const loadingMessages = [
+            "📎 I can see that you are trying to generate an image...",
+            "💻 Remember: We have your IP!",
+            "💀 Oh that prompt is repulsive!",
+            "📞 Contacting the authoroties...",
+            "👮‍♂️ The police are on their way.",
+            "𓀀𓀁𓀅𓀝𓀘𓀒"
+        ];
+
+        const promptInput = document.getElementById("prompt");
+        const generateButton = document.getElementById("generate");
+        const loadingDiv = document.getElementById("loading");
+        const imageOutput = document.getElementById("image");
+        
+        let loadingInterval;
+        let currentMessageIndex = 0;
+
+        function updateLoadingMessage() {
+            loadingDiv.textContent = loadingMessages[currentMessageIndex];
+            currentMessageIndex = (currentMessageIndex + 1) % loadingMessages.length;
+        }
+
+        async function generateImage() {
+            const prompt = promptInput.value;
+            if (!prompt) return;
+
+            // Show loading, hide img
+            loadingDiv.style.display = "block";
+            imageOutput.style.display = "none";
+            generateButton.disabled = true;
+
+            // Start cycling through messages
+            currentMessageIndex = 0;
+            updateLoadingMessage();
+            loadingInterval = setInterval(updateLoadingMessage, 10000);
+
+            try {
+                const response = await fetch(
+                    `http://localhost:8000/generate?prompt=${encodeURIComponent(prompt)}`
+                );
+                const data = await response.json();
+
+                if (data.image) {
+                    imageOutput.src = `data:image/jpeg;base64,${data.image}`;
+                } else {
+                    console.error('No image data received');
+                }
+            } catch (error) {
+                console.error('Error fetching image:', error);
+            } finally {
+                // Clean up
+                clearInterval(loadingInterval);
+                loadingDiv.style.display = "none";
+                generateButton.disabled = false;
+            }
+        }
+
+        // Set up event listeners
+        generateButton.addEventListener("click", generateImage);
+        promptInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") generateImage();
+        });
+
+        // Show image when loaded
+        imageOutput.addEventListener('load', () => {
+            imageOutput.style.display = "block";
+        });
+
+        // Log errors when img-load fails
+        imageOutput.addEventListener('error', () => {
+            console.error('Error loading image');
+            imageOutput.style.display = "none";
+        });
+    </script>
+</body>
+</html>
