@@ -29,8 +29,8 @@ class StableDiffusion:
 
         # Config for generation
         self.default_config = {
-            "num_inference_steps": 30,
-            "guidance_scale": 7.5,
+            "num_inference_steps": 6,
+            "guidance_scale": 1.5,
             "negative_prompt": "text, watermark, logo, title, signature, blurry, low quality, distorted",
         }
 
