@@ -5,6 +5,7 @@ from diffusers import StableDiffusionXLPipeline, AutoencoderKL
 from dotenv import load_dotenv
 from io import BytesIO
 import base64
+from diffusers import DPMSolverMultistepScheduler
 
 
 class StableDiffusion:
@@ -29,8 +30,8 @@ class StableDiffusion:
 
         # Config for generation
         self.default_config = {
-            "num_inference_steps": 6,
-            "guidance_scale": 1.5,
+            "num_inference_steps": 5,
+            "guidance_scale": 2,
             "negative_prompt": "text, watermark, logo, title, signature, blurry, low quality, distorted",
         }
 
@@ -67,6 +68,13 @@ class StableDiffusion:
             except Exception:
                 pass  # Xformers not available
 
+            # Set DPM++ Multistep as the default scheduler
+            self.pipeline.scheduler = DPMSolverMultistepScheduler.from_config(
+                self.pipeline.scheduler.config,
+                algorithm_type="dpmsolver++",
+                solver_order=2,
+            )
+
             self._is_initialized = True
 
         except Exception as e:
@@ -83,7 +91,7 @@ class StableDiffusion:
             self._is_initialized = False
 
     def generate_image(
-        self, prompt: str, width: int = 1024, height: int = 1024
+        self, prompt: str, width: int = 768, height: int = 768
     ) -> Image.Image:
         """
         Generate an image from a prompt.
