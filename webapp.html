@@ -226,7 +226,7 @@
 
             try {
                 const response = await fetch(
-                    `http://localhost:8000/generate?prompt=${encodeURIComponent(prompt)}`
+                    `http://localhost:8001/generate?prompt=${encodeURIComponent(prompt)}`
                 );
                 const data = await response.json();
 

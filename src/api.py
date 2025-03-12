@@ -11,8 +11,8 @@ app = fastapi.FastAPI()
 # Dictionary to store user pipelines and their last activity time
 user_pipelines: Dict[str, tuple[StableDiffusion, float]] = {}
 
-# Cleanup threshold in seconds (e.g., remove pipelines inactive for 5 minutes)
-CLEANUP_THRESHOLD = 300
+# Cleanup threshold in seconds
+CLEANUP_THRESHOLD = 3600  # Open for 1 hour during development
 
 app.add_middleware(
     CORSMiddleware,
@@ -96,4 +96,4 @@ async def generate_image(prompt: str, request: Request):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8001)
