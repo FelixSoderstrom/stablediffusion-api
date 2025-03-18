@@ -5,25 +5,22 @@ import uvicorn
 from fastapi import HTTPException, Request
 from typing import Dict
 import time
-
-app = fastapi.FastAPI()
+import asyncio
+from contextlib import asynccontextmanager
 
 # Dictionary to store user pipelines and their last activity time
 user_pipelines: Dict[str, tuple[StableDiffusion, float]] = {}
 
 # Cleanup threshold in seconds
 CLEANUP_THRESHOLD = 3600  # Open for 1 hour during development
+# Interval for running background cleanup (in seconds)
+CLEANUP_INTERVAL = 300  # Run cleanup every 5 minutes
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Global task reference to manage the background task
+cleanup_task = None
 
 
-def cleanup_inactive_pipelines():
+async def cleanup_inactive_pipelines():
     """Remove pipelines that haven't been used for a while"""
     current_time = time.time()
     inactive_users = [
@@ -39,12 +36,45 @@ def cleanup_inactive_pipelines():
         del user_pipelines[ip]
 
 
+async def periodic_cleanup():
+    """Run cleanup task periodically in the background"""
+    while True:
+        await asyncio.sleep(CLEANUP_INTERVAL)
+        await cleanup_inactive_pipelines()
+
+
+@asynccontextmanager
+async def lifespan(app: fastapi.FastAPI):
+    # Startup: create the background task
+    global cleanup_task
+    cleanup_task = asyncio.create_task(periodic_cleanup())
+    print("Background cleanup task started")
+
+    yield
+
+    # Shutdown: cancel the task
+    if cleanup_task:
+        cleanup_task.cancel()
+        try:
+            await cleanup_task
+        except asyncio.CancelledError:
+            print("Background cleanup task cancelled")
+
+
+app = fastapi.FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 def get_user_pipeline(client_ip: str) -> StableDiffusion:
     """Get or create a pipeline for the user"""
     current_time = time.time()
-
-    # Clean up old pipelines first
-    cleanup_inactive_pipelines()
 
     # Return existing pipeline if available
     if client_ip in user_pipelines:
@@ -72,7 +102,7 @@ async def generate_image(prompt: str, request: Request):
     """
     Generate an image using a user-specific pipeline instance.
     Each client gets their own pipeline, which is reused across their requests.
-    Inactive pipelines are automatically cleaned up to free resources.
+    Inactive pipelines are automatically cleaned up in the background.
     """
     if not prompt or len(prompt.strip()) == 0:
         raise HTTPException(status_code=400, detail="Prompt cannot be empty")
