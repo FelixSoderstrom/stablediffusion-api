@@ -7,17 +7,16 @@ from typing import Dict
 import time
 import asyncio
 from contextlib import asynccontextmanager
+from src.logger.logger import get_logger
 
 # Dictionary to store user pipelines and their last activity time
 user_pipelines: Dict[str, tuple[StableDiffusion, float]] = {}
 
-# Cleanup threshold in seconds
+# Global variables to manage background tasks
 CLEANUP_THRESHOLD = 3600  # Open for 1 hour during development
-# Interval for running background cleanup (in seconds)
 CLEANUP_INTERVAL = 300  # Run cleanup every 5 minutes
-
-# Global task reference to manage the background task
-cleanup_task = None
+cleanup_task = None  # Task reference to manage background tasks
+logger = get_logger(__name__)
 
 
 async def cleanup_inactive_pipelines():
