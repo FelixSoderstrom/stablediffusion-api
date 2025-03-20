@@ -45,7 +45,7 @@ async def generate_image(prompt: str, request: Request):
     try:
         sd = get_user_pipeline(client_ip)
         image = sd.generate_image(prompt)
-        return {"image": sd.convert_into_base64(image)}
+        b64_image = sd.convert_into_base64(image)
     except Exception as e:
         # If there's an error, clean up this user's pipeline
         if client_ip in user_pipelines:
@@ -55,6 +55,11 @@ async def generate_image(prompt: str, request: Request):
         raise HTTPException(
             status_code=500, detail=f"Failed to generate image: {str(e)}"
         )
+
+    logger.info(
+        f"Image generated successfully with size of {len(b64_image)/1000} kb. Returning to client.."
+    )
+    return {"image": b64_image}
 
 
 if __name__ == "__main__":
