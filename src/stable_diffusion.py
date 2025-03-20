@@ -58,7 +58,7 @@ class StableDiffusion:
             if not os.path.exists(model_path):
                 self.logger.error(f"Model not found at {model_path}")
                 raise FileNotFoundError(f"Model not found at {model_path}")
-            self.logger.info(f"Model found")
+            self.logger.info("Model found")
 
             # Load and optimize pipeline
             vae = AutoencoderKL.from_single_file(
